@@ -68,6 +68,16 @@ class Plotter:
 
         plt.plot(dateIndex, lineDF.values, c = color)
 
+    def plotSingleLine(self, startDate, endDate, startAnchor = "close", endAnchor = "close", color = "cyan", ls = "solid"):
+        startDate = parser.parse(startDate)
+        endDate = parser.parse(endDate)
+        
+        y1 = self.selectData.loc[startDate][startAnchor]
+        y2 = self.selectData.loc[endDate][endAnchor]
+
+        plt.plot([startDate, endDate], [y1, y2], c=color, ls=ls)
+
+
     def upArrow(self, date, y = None, color = "m"):
         date = parser.parse(date)
 

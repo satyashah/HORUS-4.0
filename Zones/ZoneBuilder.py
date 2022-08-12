@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0, 'C:/Programming/HORUS-4.0')
 from SetUp import *
 from Data.DataHandler import DataHandler
-from IndicatorClass import *
+from ZoneClass import *
 
 ticks = ["GBPJPY", "EURUSD"]
 dhOBJ = DataHandler()
@@ -12,18 +12,15 @@ for tick in ticks:
     # testingData = dhOBJ.getRawData(tick, filter5m = True) # If not already built correctly
     # dhOBJ.saveDF(testingData, f"StockData/Raw/{tick}.csv") # If not already built correctly
 
-    rawData = dhOBJ.getDF(f"StockData/Raw/{tick}.csv")
-    print(rawData)
+    indicatorData = dhOBJ.getDF(f"StockData/INDICATOR/{tick}.csv")
+    print(indicatorData)
 
-    emaOBJ = ema(rawData, "c", "1d", 20)
+    zoneOBJ = EmaAtrZone(indicatorData["ema_20_1h_c"], indicatorData["atr_14_1h"])
 
-    atrOBJ = atr(rawData, "1h", 14)
+    print(zoneOBJ.df)
 
-    print(emaOBJ.df)
-    print(atrOBJ.df)
-
-    indicatorDF = pd.concat([rawData, emaOBJ.df, atrOBJ.df], axis = 1)
+    indicatorDF = pd.concat([indicatorData, zoneOBJ.df], axis = 1)
 
     print(indicatorDF)
 
-    dhOBJ.saveDF(indicatorDF, "StockData/Indicator/{}.csv".format(tick))
+    dhOBJ.saveDF(indicatorDF, "StockData/Zone/{}.csv".format(tick))
