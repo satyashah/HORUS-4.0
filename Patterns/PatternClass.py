@@ -1,18 +1,6 @@
-from subprocess import ABOVE_NORMAL_PRIORITY_CLASS
 import sys
 sys.path.insert(0, 'C:/Programming/HORUS-4.0')
 from SetUp import *
-
-from Data.DataHandler import DataHandler
-from Plotter import Plotter
-
-#Get RAW Data
-tick = "GBPJPY"
-dhOBJ = DataHandler()
-zoneData = dhOBJ.getDF(f"StockData/ZONE/{tick}.csv").iloc[:2000]
-# print(zoneData)
-
-#Build Class
 
 class LeaveZone:
     """
@@ -153,58 +141,3 @@ class inZone:
             newMinor[(newMinor.index>=lastMinor.name) & (newMinor.index<curMinor.name)] = list(lastMinor.values)
 
         return newMinor
-
-
-#----------Call Class
-
-inZoneOBJ = inZone(zoneData, "1h", 'ematrTopBuy', 'ematrBottomBuy', 'ematrTopSell', 'ematrBottomSell', extendDF = False)
-inZoneDF = inZoneOBJ.df
-print(inZoneDF)
-
-leaveZoneOBJ = LeaveZone(zoneData, "1h", inZoneDF, extendDF = False)
-leaveZoneDF = leaveZoneOBJ.df
-print(leaveZoneDF)
-
-
-# patternOBJ = LeaveZone(zoneData, "1h", 'ematrTopBuy', 'ematrBottomBuy', 'ematrTopSell', 'ematrBottomSell')
-# zoneDF = zoneOBJ.df
-# print(zoneDF)
-
-
-# print(zoneDF[["ematrTopBuy", "ematrBottomBuy"]])
-
-# score, sampleSize, valDF = zoneOBJ.validate(indicatorData, "1h", indicatorData["atr_14"], atrDistance= 2)
-
-# print(valDF)
-# print(score, sampleSize)
-
-
-#----------Test Class [Optimize as well]
-
-
-
-
-#----------Plot Class
-
-pltOBJ = Plotter(zoneData, "1h")
-
-pltOBJ.plot()
-
-pltOBJ.shadeArea(zoneData[["ematrTopBuy", "ematrBottomBuy"]], 0.3, 'lime')
-pltOBJ.shadeArea(zoneData[["ematrTopSell", "ematrBottomSell"]], 0.3, 'pink')
-
-for index, bar in inZoneDF.iterrows():
-    if bar["inBuyRange"] == True:
-        pltOBJ.upArrow(index, color = "yellow")
-    if bar["inSellRange"] == True:
-        pltOBJ.downArrow(index, color = "pink")
-
-
-for index, bar in leaveZoneDF.iterrows():
-    if bar["leaveBuyZone"] == True:
-        pltOBJ.upArrow(index, color = "green")
-    if bar["leaveSellZone"] == True:
-        pltOBJ.downArrow(index, color = "red")
-
-
-pltOBJ.show()

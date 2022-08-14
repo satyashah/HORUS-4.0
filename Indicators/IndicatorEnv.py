@@ -203,10 +203,10 @@ class ema:
 
 #----------Call Class
 
-emaOBJ = ema(rawData, "o", "1d", 10, name = "blly")
+emaOBJ = ema(rawData, "o", "1h", 20, name = "blly")
 emaDF = emaOBJ.df
 
-atrOBJ = atr(rawData, "1h", 14, name = "fredd")
+atrOBJ = atr(rawData, "1h", 20, name = "fredd")
 atrDF = atrOBJ.df
 
 print(emaDF)
