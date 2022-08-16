@@ -8,7 +8,7 @@ from Plotter import Plotter
 #Get RAW Data
 tick = "GBPJPY"
 dhOBJ = DataHandler()
-indicatorData = dhOBJ.getDF(f"StockData/INDICATOR/{tick}.csv")#.iloc[10000:20000]
+indicatorData = dhOBJ.getDF(f"StockData/INDICATOR/{tick}.csv").iloc[-10000:]
 print(indicatorData)
 
 #Build Class
@@ -190,15 +190,19 @@ class VPVWAPEMAZone:
             sellRange = [np.nan, np.nan]
             buyRange = [np.nan, np.nan]
 
-            for vwapSD in [n2SD, n1SD, vwap, p1SD, p2SD]:
+            for vwapSD in [n2SD,n1SD, vwap, p1SD, p2SD]:
                 if max(vwapSD, curVp, curEma) - min(vwapSD, curVp, curEma) < curAtr:
 
                     mean = sum([vwapSD, curVp, curEma])/3
                     # sellRange = [max(vwapSD, curVp, curEma), min(vwapSD, curVp, curEma)]
                     # buyRange = [max(vwapSD, curVp, curEma), min(vwapSD, curVp, curEma)]
 
-                    sellRange = [mean+curAtr, mean-curAtr]
-                    buyRange = [mean+curAtr, mean-curAtr]
+                    
+                    sellRange = [max(vwapSD, curVp, curEma)+curAtr/2, min(vwapSD, curVp, curEma)-curAtr/2]
+                    buyRange = [max(vwapSD, curVp, curEma)+curAtr/2, min(vwapSD, curVp, curEma)-curAtr/2]
+
+                    # sellRange = [mean+curAtr, mean-curAtr]
+                    # buyRange = [mean+curAtr, mean-curAtr]
 
             #Top, Bottom
             # if abs(curVp - p2SD) < curAtr:
@@ -336,9 +340,19 @@ pltOBJ = Plotter(indicatorData, "1h")
 
 pltOBJ.plot()
 
-# pltOBJ.plotLine(indicatorData["EMA_20"], color="yellow")
-# pltOBJ.plotLine(indicatorData["EMA_20"]+indicatorData["atr_14"], color="lime")
-# pltOBJ.plotLine(indicatorData["EMA_20"]-indicatorData["atr_14"], color="pink")
+# pltOBJ.plotLine(indicatorData["ema"], color="#FAF4D3")
+# pltOBJ.plotLine(indicatorData["ema"]+indicatorData["atr"], color="#004643")
+# pltOBJ.plotLine(indicatorData["ema"]-indicatorData["atr"], color="#D1AC00")
+
+# pltOBJ.plotLine(indicatorData["poc"], color = "#CDEDF6")
+# pltOBJ.plotLine(indicatorData["poc"]+indicatorData["atr"], color = "#5EB1BF")
+# pltOBJ.plotLine(indicatorData["poc"]-indicatorData["atr"], color = "#EF7B45")
+
+# pltOBJ.plotLine(indicatorData["+2SD"], color = "#EF476F")
+# pltOBJ.plotLine(indicatorData["+SD"], color = "#FFD166")
+# pltOBJ.plotLine(indicatorData["vwap"], color = "#06D6A0")
+# pltOBJ.plotLine(indicatorData["-SD"], color = "#118AB2")
+# pltOBJ.plotLine(indicatorData["-2SD"], color = "#0A5770")
 
 pltOBJ.shadeArea(zoneDF[["ematrTopBuy", "ematrBottomBuy"]], 0.3, 'lime')
 pltOBJ.shadeArea(zoneDF[["ematrTopSell", "ematrBottomSell"]], 0.3, 'pink')
