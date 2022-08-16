@@ -9,4 +9,4 @@ import itertools
 import time
 from scipy.signal import argrelextrema
 import statistics
-from sklearn.linear_model import LinearRegression
+# from sklearn.linear_model import LinearRegression
