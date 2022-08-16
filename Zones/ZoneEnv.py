@@ -8,12 +8,12 @@ from Plotter import Plotter
 #Get RAW Data
 tick = "GBPJPY"
 dhOBJ = DataHandler()
-indicatorData = dhOBJ.getDF(f"StockData/INDICATOR/{tick}.csv")
+indicatorData = dhOBJ.getDF(f"StockData/INDICATOR/{tick}.csv").iloc[30000:50000]
 print(indicatorData)
 
 #Build Class
 
-class EmaAtrZone:
+class VPVWAPZone:
     """
     Enter an ema and atr, the zone is the area between
     
@@ -33,20 +33,36 @@ class EmaAtrZone:
                 pltOBJ.plotSingleLine(trade["lastDate"], trade["curDate"], startAnchor="close", endAnchor="low", color = color, ls="dotted") if trade["side"] == "long" else pltOBJ.plotSingleLine(trade["lastDate"], trade["curDate"], startAnchor="close", endAnchor="high", color = color, ls="dotted")
     
     """
-    def __init__(self, emaDF, atrDF, name = "ematr") -> None:
+    def __init__(self, vpDF, vwapDF, atrDF, name = "ematr") -> None:
         self.name = name
-        self.df = self.buildZone(emaDF, atrDF)
+        self.df = self.buildZone(vpDF, vwapDF, atrDF)
 
-    def buildZone(self, emaDF, atrDF):
+    def buildZone(self, vpDF, vwapDF ,atrDF):
         zoneArr = []
-        for date in emaDF.index.values:
-            curEma = emaDF.loc[date]
+        for date in vwapDF.index.values:
+            n2SD, n1SD, vwap, p1SD, p2SD  = vwapDF.loc[date].values
+            curVp = vpDF.loc[date]
             curAtr = atrDF.loc[date]
 
+            sellRange = [np.nan, np.nan]
+            buyRange = [np.nan, np.nan]
+
             #Top, Bottom
-            sellRange = [curEma, curEma-curAtr]
-            buyRange = [curEma+curAtr, curEma]
-            
+            if abs(curVp - p2SD) < curAtr:
+                sellRange = [np.nan, np.nan]
+                buyRange = [max(curVp, p2SD), min(curVp, p2SD)]
+            elif abs(curVp - p1SD) < curAtr:
+                sellRange = [np.nan, np.nan]
+                buyRange = [max(curVp, p1SD), min(curVp, p1SD)]
+            elif abs(curVp - vwap) < curAtr:
+                sellRange = [max(curVp, vwap), min(curVp, vwap)]
+                buyRange = [max(curVp, vwap), min(curVp, vwap)]
+            elif abs(curVp - n1SD) < curAtr:
+                sellRange = [max(curVp, n1SD), min(curVp, n1SD)]
+                buyRange = [np.nan, np.nan]
+            elif abs(curVp - n2SD) < curAtr:
+                sellRange = [max(curVp, n2SD), min(curVp, n2SD)]
+                buyRange = [np.nan, np.nan]
 
             zoneArr.append([date, sellRange[0], sellRange[1], buyRange[0], buyRange[1]])
 
@@ -144,14 +160,14 @@ class EmaAtrZone:
 
 #----------Call Class
 
-zoneOBJ = EmaAtrZone(indicatorData["EMA_20"], indicatorData["atr_14"])
+zoneOBJ = VPVWAPZone(indicatorData["poc"], indicatorData[["-2SD","-SD","vwap","+SD","+2SD"]], indicatorData["atr"])
 zoneDF = zoneOBJ.df
 print(zoneDF)
 
 
 print(zoneDF[["ematrTopBuy", "ematrBottomBuy"]])
 
-score, sampleSize, valDF = zoneOBJ.validate(indicatorData, "1h", indicatorData["atr_14"], atrDistance= 2)
+score, sampleSize, valDF = zoneOBJ.validate(indicatorData, "1h", indicatorData["atr"], atrDistance= 2)
 
 print(valDF)
 print(score, sampleSize)

@@ -7,3 +7,6 @@ import pandas_ta as ta
 import numpy as np
 import itertools
 import time
+from scipy.signal import argrelextrema
+import statistics
+from sklearn.linear_model import LinearRegression
