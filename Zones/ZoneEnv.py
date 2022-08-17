@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, 'C:/Users/satya/Documents/Programming/HORUS-4.0')
+sys.path.insert(0, 'C:/Programming/HORUS-4.0')
 from SetUp import *
 
 from Data.DataHandler import DataHandler
@@ -175,7 +175,7 @@ class VPVWAPEMAZone:
                 pltOBJ.plotSingleLine(trade["lastDate"], trade["curDate"], startAnchor="close", endAnchor="low", color = color, ls="dotted") if trade["side"] == "long" else pltOBJ.plotSingleLine(trade["lastDate"], trade["curDate"], startAnchor="close", endAnchor="high", color = color, ls="dotted")
     
     """
-    def __init__(self, vpDF, vwapDF, emaDF, atrDF, name = "ematr") -> None:
+    def __init__(self, vpDF, vwapDF, emaDF, atrDF, name = "vpvwapema") -> None:
         self.name = name
         self.df = self.buildZone(vpDF, vwapDF, emaDF, atrDF)
 
@@ -191,18 +191,21 @@ class VPVWAPEMAZone:
             buyRange = [np.nan, np.nan]
 
             for vwapSD in [n2SD,n1SD, vwap, p1SD, p2SD]:
-                if max(vwapSD, curVp, curEma) - min(vwapSD, curVp, curEma) < curAtr:
+                for emaAtr in [curEma+curAtr, curEma, curEma-curAtr]:
+                    if max(vwapSD, curVp, emaAtr) - min(vwapSD, curVp, emaAtr) < curAtr:
+                        mean = sum([vwapSD, curVp, emaAtr])/3
+                        if (vwapSD == n2SD or vwapSD == n1SD) and emaAtr == curEma-curAtr:
+                            sellRange = [max(vwapSD, curVp, emaAtr), min(vwapSD, curVp, emaAtr)]
+                            buyRange = [np.nan, np.nan]
+                        elif (vwapSD == p2SD or vwapSD == p1SD) and emaAtr == curEma+curAtr:
+                            sellRange = [np.nan, np.nan]
+                            buyRange = [max(vwapSD, curVp, emaAtr), min(vwapSD, curVp, emaAtr)]
+                        else:
+                            sellRange = [max(vwapSD, curVp, emaAtr), min(vwapSD, curVp, emaAtr)]
+                            buyRange = [max(vwapSD, curVp, emaAtr), min(vwapSD, curVp, emaAtr)]
 
-                    mean = sum([vwapSD, curVp, curEma])/3
-                    # sellRange = [max(vwapSD, curVp, curEma), min(vwapSD, curVp, curEma)]
-                    # buyRange = [max(vwapSD, curVp, curEma), min(vwapSD, curVp, curEma)]
-
-                    
-                    sellRange = [max(vwapSD, curVp, curEma)+curAtr/2, min(vwapSD, curVp, curEma)-curAtr/2]
-                    buyRange = [max(vwapSD, curVp, curEma)+curAtr/2, min(vwapSD, curVp, curEma)-curAtr/2]
-
-                    # sellRange = [mean+curAtr, mean-curAtr]
-                    # buyRange = [mean+curAtr, mean-curAtr]
+                        # sellRange = [mean+curAtr, mean-curAtr]
+                        # buyRange = [mean+curAtr, mean-curAtr]
 
             #Top, Bottom
             # if abs(curVp - p2SD) < curAtr:
@@ -354,8 +357,8 @@ pltOBJ.plot()
 # pltOBJ.plotLine(indicatorData["-SD"], color = "#118AB2")
 # pltOBJ.plotLine(indicatorData["-2SD"], color = "#0A5770")
 
-pltOBJ.shadeArea(zoneDF[["ematrTopBuy", "ematrBottomBuy"]], 0.3, 'lime')
-pltOBJ.shadeArea(zoneDF[["ematrTopSell", "ematrBottomSell"]], 0.3, 'pink')
+pltOBJ.shadeArea(zoneDF[["vpvwapemaTopBuy", "vpvwapemaBottomBuy"]], 0.3, 'lime')
+pltOBJ.shadeArea(zoneDF[["vpvwapemaTopSell", "vpvwapemaBottomSell"]], 0.3, 'pink')
 
 
 # for index, trade in valDF.iterrows():
